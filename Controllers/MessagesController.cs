@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace teamsBot.Controllers
 {
+    [Route("api/[controller]")]
     public class MessagesController : Controller
     {
         private IConfiguration configuration;
