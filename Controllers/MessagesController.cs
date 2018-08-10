@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Connector;
 using Microsoft.Extensions.Configuration;
+using teamsBot.Services;
 
 namespace teamsBot.Controllers
 {
@@ -11,16 +12,17 @@ namespace teamsBot.Controllers
     public class MessagesController : Controller
     {
         private IConfiguration configuration;
-        private static String channelId;
-        private static String conversationId;
-        private static String serviceUri;
+        private readonly BotService botService;
+        private static string channelId;
+        private static string conversationId;
+        private static string serviceUri;
         private static ConversationAccount conversation;
         private static ChannelAccount bot;
 
-        public MessagesController(IConfiguration configuration)
+        public MessagesController(IConfiguration configuration, BotService botService)
         {
             this.configuration = configuration;
-            
+            this.botService = botService;
         }
 
 
@@ -50,6 +52,8 @@ namespace teamsBot.Controllers
             else if (activity.Type == ActivityTypes.ConversationUpdate)
             {
                 if (activity.MembersAdded.Count > 0 && activity.MembersAdded[0].Name == "Bot") {
+                    this.botService.serviceUrl = activity.ServiceUrl;
+                    this.botService.Save();
                     bot = activity.Recipient;
                     serviceUri = activity.ServiceUrl;
                     channelId = activity.ChannelId;
@@ -70,7 +74,10 @@ namespace teamsBot.Controllers
         }
 
         [HttpPost("webhook")]
-        public async Task<OkResult> Webhook([FromBody] object jsonData) {
+        public async Task<OkResult> Webhook([FromBody] object jsonData)
+        {
+            this.botService.Join();
+
             var appCredentials = new MicrosoftAppCredentials(configuration);
             var connector = new ConnectorClient(new Uri(serviceUri), appCredentials);
             IMessageActivity newActivity = Activity.CreateMessageActivity();

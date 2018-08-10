@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Bot.Connector;
+using teamsBot.Services;
 
 namespace teamsBot
 {
@@ -53,6 +54,7 @@ namespace teamsBot
                 .AddBotAuthentication(credentialProvider);
             
             services.AddSingleton(typeof(ICredentialProvider), credentialProvider);
+            services.AddSingleton<BotService>(b =>  new BotService(Configuration));
 
             services.AddMvc(options =>
             {
