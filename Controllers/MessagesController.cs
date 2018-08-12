@@ -76,14 +76,14 @@ namespace teamsBot.Controllers
         {
             // this.botService.Join();
             this.botService.Restore();
-            // var appCredentials = new MicrosoftAppCredentials(configuration);
-            // var connector = new ConnectorClient(new Uri(serviceUri), appCredentials);
-            // IMessageActivity newActivity = Activity.CreateMessageActivity();
-            // newActivity.From = bot;
-            // newActivity.Conversation = new ConversationAccount(id: conversationId);
-            // newActivity.Text = "Webhooks!";
+            var appCredentials = new MicrosoftAppCredentials(configuration);
+            var connector = new ConnectorClient(new Uri(this.botService.serviceUrl), appCredentials);
+            IMessageActivity newActivity = Activity.CreateMessageActivity();
+            newActivity.From = this.botService.account;
+            newActivity.Conversation = new ConversationAccount(id: this.botService.conversationId);
+            newActivity.Text = "Webhooks!";
 
-            // await connector.Conversations.SendToConversationAsync(conversationId, (Activity)newActivity);
+            await connector.Conversations.SendToConversationAsync(this.botService.conversationId, (Activity)newActivity);
 
             return Ok();
         }

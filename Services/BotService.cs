@@ -39,7 +39,7 @@ namespace teamsBot.Services
             // id = botDocument.GetElement("id").ToString();
             serviceUrl = botDocument.GetElement("serviceUrl").Value.ToString();
             conversationId = botDocument.GetElement("conversationId").Value.ToString();
-            account = new ChannelAccount(botDocument.GetElement("account").Value.ToString());
+            account = new ChannelAccount(id: botDocument.GetElement("account").Value.ToString(), name: "Bot");
         }
 
         public void Save()
