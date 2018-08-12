@@ -75,7 +75,7 @@ namespace teamsBot.Controllers
         public async Task<OkResult> Webhook([FromBody] object jsonData)
         {
             // this.botService.Join();
-
+            this.botService.Restore();
             // var appCredentials = new MicrosoftAppCredentials(configuration);
             // var connector = new ConnectorClient(new Uri(serviceUri), appCredentials);
             // IMessageActivity newActivity = Activity.CreateMessageActivity();
