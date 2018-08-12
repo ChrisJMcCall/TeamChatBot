@@ -13,11 +13,7 @@ namespace teamsBot.Controllers
     {
         private IConfiguration configuration;
         private readonly BotService botService;
-        private static string channelId;
-        private static string conversationId;
-        private static string serviceUri;
         private static ConversationAccount conversation;
-        private static ChannelAccount bot;
 
         public MessagesController(IConfiguration configuration, BotService botService)
         {
@@ -52,18 +48,20 @@ namespace teamsBot.Controllers
             else if (activity.Type == ActivityTypes.ConversationUpdate)
             {
                 if (activity.MembersAdded.Count > 0 && activity.MembersAdded[0].Name == "Bot") {
+                    // This is the only point the bot connection info gets saved so that it can
+                    // be retrieved later. I would like to have another reliable place to get the 
+                    // information without reliance on the join event, but this is all I can find so far.
+
                     this.botService.serviceUrl = activity.ServiceUrl;
+                    this.botService.conversationId = activity.Conversation.Id;
+                    this.botService.account = activity.Recipient;
                     this.botService.Save();
-                    bot = activity.Recipient;
-                    serviceUri = activity.ServiceUrl;
-                    channelId = activity.ChannelId;
-                    conversationId = activity.Conversation.Id;
                     
                     var appCredentials = new MicrosoftAppCredentials(configuration);
                     var connector = new ConnectorClient(new Uri(activity.ServiceUrl), appCredentials);
                     Activity newActivity = activity.CreateReply("Chime in");
 
-                    await connector.Conversations.SendToConversationAsync(conversationId, newActivity);
+                    await connector.Conversations.SendToConversationAsync(activity.Conversation.Id, newActivity);
                 }
             }
             else
@@ -76,16 +74,16 @@ namespace teamsBot.Controllers
         [HttpPost("webhook")]
         public async Task<OkResult> Webhook([FromBody] object jsonData)
         {
-            this.botService.Join();
+            // this.botService.Join();
 
-            var appCredentials = new MicrosoftAppCredentials(configuration);
-            var connector = new ConnectorClient(new Uri(serviceUri), appCredentials);
-            IMessageActivity newActivity = Activity.CreateMessageActivity();
-            newActivity.From = bot;
-            newActivity.Conversation = new ConversationAccount(id: conversationId);
-            newActivity.Text = "Webhooks!";
+            // var appCredentials = new MicrosoftAppCredentials(configuration);
+            // var connector = new ConnectorClient(new Uri(serviceUri), appCredentials);
+            // IMessageActivity newActivity = Activity.CreateMessageActivity();
+            // newActivity.From = bot;
+            // newActivity.Conversation = new ConversationAccount(id: conversationId);
+            // newActivity.Text = "Webhooks!";
 
-            await connector.Conversations.SendToConversationAsync(conversationId, (Activity)newActivity);
+            // await connector.Conversations.SendToConversationAsync(conversationId, (Activity)newActivity);
 
             return Ok();
         }

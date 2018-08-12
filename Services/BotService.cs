@@ -17,7 +17,6 @@ namespace teamsBot.Services
         public string serviceUrl { get; set; }
         public string conversationId { get; set; }
         public ChannelAccount account { get; set; }
-        public ConversationAccount conversation { get; set; } 
 
         public BotService(IConfiguration configuration)
         {
@@ -28,7 +27,13 @@ namespace teamsBot.Services
         {
             var appCredentials = new MicrosoftAppCredentials(configuration);
             var connector = new ConnectorClient(new Uri(serviceUrl), appCredentials);
+        }
 
+        public void Restore()
+        {
+            var client = new MongoClient("mongodb://localhost:27017");
+            var database = client.GetDatabase("chatbot");
+            var collection = database.GetCollection<BsonDocument>("bot");
         }
 
         public void Save()
@@ -36,7 +41,11 @@ namespace teamsBot.Services
             var client = new MongoClient("mongodb://localhost:27017");
             var database = client.GetDatabase("chatbot");
             var collection = database.GetCollection<BsonDocument>("bot");
-            var botServiceDocument = new BsonDocument(new Dictionary<string,string>{{"serviceUrl",serviceUrl}});
+            var botServiceDocument = new BsonDocument(new Dictionary<string,object>{
+                {"serviceUrl",serviceUrl},
+                {"conversationId", conversationId},
+                {"account", account.Id}
+                });
             collection.InsertOne(botServiceDocument);
         }
     }
