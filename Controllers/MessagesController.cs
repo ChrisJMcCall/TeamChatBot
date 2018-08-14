@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Connector;
 using Microsoft.Extensions.Configuration;
+using teamsBot.Models;
 using teamsBot.Services;
 
 namespace teamsBot.Controllers
 {
+    
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {
@@ -72,16 +74,18 @@ namespace teamsBot.Controllers
         }
 
         [HttpPost("webhook")]
-        public async Task<OkResult> Webhook([FromBody] object jsonData)
+        public async Task<OkResult> Webhook([FromBody] WebHookEvent jsonData)
         {
-            // this.botService.Join();
             this.botService.Restore();
             var appCredentials = new MicrosoftAppCredentials(configuration);
+            MicrosoftAppCredentials.TrustServiceUrl(this.botService.serviceUrl);
             var connector = new ConnectorClient(new Uri(this.botService.serviceUrl), appCredentials);
+            
             IMessageActivity newActivity = Activity.CreateMessageActivity();
             newActivity.From = this.botService.account;
+            newActivity.ChannelId = "emulator";
             newActivity.Conversation = new ConversationAccount(id: this.botService.conversationId);
-            newActivity.Text = "Webhooks!";
+            newActivity.Text = jsonData.eventType;
 
             await connector.Conversations.SendToConversationAsync(this.botService.conversationId, (Activity)newActivity);
 

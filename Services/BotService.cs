@@ -31,8 +31,10 @@ namespace teamsBot.Services
 
         public void Restore()
         {
-            var client = new MongoClient("mongodb://localhost:27017");
-            var database = client.GetDatabase("chatbot");
+            string connectionString = configuration.GetConnectionString("mongodb");
+            var dbName = new MongoUrl(connectionString).DatabaseName;
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(dbName);
             var collection = database.GetCollection<BsonDocument>("bot");
             var filter = new BsonDocument();
             var botDocument = collection.Find(filter).Single();
@@ -44,8 +46,10 @@ namespace teamsBot.Services
 
         public void Save()
         {
-            var client = new MongoClient("mongodb://localhost:27017");
-            var database = client.GetDatabase("chatbot");
+            string connectionString = configuration.GetConnectionString("mongodb");
+            var dbName = new MongoUrl(connectionString).DatabaseName;
+            var client = new MongoClient(connectionString);
+            var database = client.GetDatabase(dbName);
             var collection = database.GetCollection<BsonDocument>("bot");
             var filter = new BsonDocument();
             var update = new BsonDocument("$set", new BsonDocument(new Dictionary<string,object>{
@@ -55,12 +59,6 @@ namespace teamsBot.Services
                 }));
             var options = new UpdateOptions { IsUpsert = true };
             var result = collection.UpdateOne(filter, update, options);
-            // var botServiceDocument = new BsonDocument(new Dictionary<string,object>{
-            //     {"serviceUrl",serviceUrl},
-            //     {"conversationId", conversationId},
-            //     {"account", account.Id}
-            //     });
-            // collection.InsertOne(botServiceDocument);
         }
     }
 }
